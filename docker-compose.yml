@@ -1,0 +1,66 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    env_file: ./.env
+    ports: ["5433:5432"]
+    volumes: [postgres_data:/var/lib/postgresql/data]
+    networks: [mks]
+
+  redis:
+    image: redis:7.0-alpine
+    container_name: redis
+    command: redis-server --appendonly yes --replica-read-only no
+    ports: ["6379:6379"]
+    volumes: ["./volumes/redis/:/etc/redis/"]
+    networks: [mks]
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: api
+    command: uvicorn --host 0.0.0.0 --port 8080 easymed.asgi:application
+    env_file: ./.env
+    volumes: ["./backend:/app"]
+    ports: ["8080:8080"]
+    depends_on: [postgres, redis]
+    networks: [mks]
+
+  worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: celery-worker
+    command: celery -A easymed worker -l info
+    env_file: ./.env
+    depends_on: [backend, redis]
+    networks: [mks]
+
+  celery-beat:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: celery-beat
+    command: celery -A easymed beat -l info
+    env_file: ./.env
+    depends_on: [backend, redis]
+    networks: [mks]
+
+  frontend:
+    build:
+      context: ./front-end
+      dockerfile: Dockerfile
+    container_name: easymed-frontend
+    ports: ["3000:3000"]
+    depends_on: [backend]
+    networks: [mks]
+
+volumes:
+  postgres_data:
+
+networks:
+  mks:
+    driver: bridge

@@ -6,7 +6,7 @@ import os
 np.random.seed(42)
 
 # Define output directory
-output_dir = r"C:\DATA1\symptom_dataset"
+output_dir = r"C:\DATASET\symptom_dataset"
 
 # Create directory if it doesn't exist
 os.makedirs(output_dir, exist_ok=True)

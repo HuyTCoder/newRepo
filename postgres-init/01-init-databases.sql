@@ -20,5 +20,15 @@ GRANT ALL ON SCHEMA public TO mcuong1011;
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO mcuong1011;
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO mcuong1011;
 
+-- === Medical Records service ===
+CREATE USER mcuong1011 WITH ENCRYPTED PASSWORD 'mcuong1011';
+CREATE DATABASE medical_records_db OWNER mcuong1011;
+GRANT ALL PRIVILEGES ON DATABASE medical_records_db TO mcuong1011;
+
+\connect medical_records_db
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+-- tables will be created by Django migrations
+
+
 -- Display created databases for verification
 \l
